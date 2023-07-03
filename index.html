@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title>Recibos Amobam</title>
+  <style>
+
+    body{
+        color:#000;
+        background-color: #fff;
+        font-family: "Arial";
+        font-size: 11pt;
+    }
+
+    table {
+        border: none;
+    }
+
+    td {
+        padding: 5px;
+    }
+
+    .borda-externa {
+        border: 3px solid #000;
+    }
+
+    #div_dados {
+        display: none;
+    }
+
+    #div_recibos {
+        display: none;
+    }
+
+    #div_botoes {
+        display: none;
+    }
+
+    .centralizado {
+        text-align: center;
+    }
+
+    .direita {
+        text-align: right;
+    }
+
+    .pequeno {
+        font-size: 8pt;
+        font-style: italic;
+    }
+
+  </style>
+  <script>
+    var margem_abaixo = 0;
+    var doadores = new Array();
+
+    function alternaImpressao(index) {
+        if (doadores[index].imp == "1")
+            doadores[index].imp = "0";
+        else
+            doadores[index].imp = "1";
+
+        salvaDoador(doadores[index]);
+
+        document.getElementById("btn_imp_"+index).innerHTML = ((doadores[index].imp=="1") ? "Sim" : "Não");
+    }
+
+    function apresentaDoador(doador, index) {
+        var html = "<tr>";
+        html += "<td>"+doador.nome+"</td>";
+        html += "<td>"+doador.dia+"</td>";
+        html += "<td>"+doador.valor+"</td>";
+        html += "<td><button id='btn_imp_"+index+"' onclick=alternaImpressao("+index+")>"+((doador.imp=="1") ? "Sim" : "Não") +"</button></td>";
+        html += "</tr>";
+
+        document.getElementById("table_dados").insertAdjacentHTML("beforeend", html);
+    }
+
+    function mostraListaDoadores() {
+        if (doadores.length) {
+            document.getElementById("div_msg").style.display="none";
+            document.getElementById("div_dados").style.display="block";
+            
+        } else {
+            document.getElementById("div_msg").innerHTML = "Ainda não tem nenhum doador na lista.";
+        }
+    }
+
+    function carregaListaNomes() {
+
+        var doador_id = 1;
+
+        var nome = window.localStorage.getItem("doador_" + doador_id);
+        while (nome) {
+            var dia     = window.localStorage.getItem("dia_" + doador_id);
+            var valor   = window.localStorage.getItem("valor_" + doador_id);
+            var ativo   = window.localStorage.getItem("ativo_" + doador_id);
+            var imprime = window.localStorage.getItem("imp_" + doador_id);
+
+            var doador = {
+                    "id": doador_id,
+                    "nome":nome,
+                    "dia":dia,
+                    "valor":valor,
+                    "imp":imprime,
+                    "ativo":ativo
+                };
+            doadores.push(doador);
+
+            doador_id++;
+            nome = window.localStorage.getItem("doador_" + doador_id);
+        }
+
+        if (doadores.length) {
+            doadores.sort((a, b) => {
+                return a.nome - b.nome;
+            });
+
+            doadores.forEach(function(item, index) {
+                if (item.ativo == "1") {
+                    apresentaDoador(item, index);
+                }
+            });
+        }
+
+        mostraListaDoadores();
+        mostraBotoes();
+    }
+
+    function geraReciboDoador(item) {
+        html = "<div style='padding-bottom:"+margem_abaixo+"px'>";
+        html += "   <table><tr><td class='borda-externa'>";
+        html += "<table><tr>";
+        html += "<td><img src='./logo1.png' /></td>";
+        html += "<td class='centralizado'>";
+        html += "<strong>Associação dos Moradores do Bairro Mollon</strong> <br />";
+        html += "Rua Atílio Bagarolo, 54, Mollon IV - SBO <br />";
+        html += "Telefone: (19) 3026-6735 | (19) 3457-2406 <br />";
+        html += "Email: amobam@amobam.org<br />";
+        html += "CNPJ: 02.921.188/0001-36 | I.E.: Isento";
+        html += "</td></tr></table><table width='100%'><tr>";
+        html += "<td>Recibo No. <b>1234</b></td>";
+        html += "<td class='direita'>Valor <b>R$ 10,00</b></td>";
+        html += "</tr></table>";
+        html += "<table width='100%'><tr><td class='centralizado'>";
+        html += "<p>Recebemos de <b>Willian Fernando Soares</b> valor referente à contribuição para a <b>\"AMOBAM\"</b>.</p>";
+        html += "<p class='direita'>SBO, 20 de Maio de 2023</p>";
+        html += "</td></tr></table>";
+        html += "<table width='100%'><tr><td class='centralizado'>";
+        html += "<p>________________________________________________________</p>";
+        html += "<p>Rosinha Aparecida de Souza Vicentin<br />Presidente</p>";
+        html += "<p class='pequeno'>\"Sorria ao acordar e expresse gratidão: sua primeira respiração matutina é a prova da Graça de Deus.\"</p>";
+        html += "</td></tr></table></td></tr></table>";
+        html += "</div>";
+
+        return html;
+    }
+
+    function imprimirRecibos() {
+        var html = "";
+        var fez = false;
+
+        if (doadores.length) {
+            doadores.forEach(function(item, index){
+                if ((item.ativo=="1") && (item.imp=="1")) {
+                    fez = true;
+                    html += geraReciboDoador(item);
+                }
+            });
+        }
+
+        if (!fez) {
+            alert("Não tinha nada para imprimir.");
+            return;
+        }
+
+        html += "<p><a href='javascript:voltarAosNomes()'>Voltar aos nomes</a></p>";
+
+        document.getElementById("div_recibos").innerHTML = html;
+        document.getElementById("div_nomes").style.display="none";
+        document.getElementById("div_recibos").style.display="block";
+
+        setTimeout(function(){
+            window.print();
+        }, 1000);
+    }
+
+    function mostraBotoes() {
+        document.getElementById("div_botoes").style.display="block";
+    }
+
+    function novoDoador() {
+        var nome = prompt("Nome:");
+        if ((!nome) || (nome==""))
+            return;
+
+        var dia = prompt("Dia da doação:");
+        if ((!dia) || (dia==""))
+            return;
+
+        var valor = prompt("Valor da doação:");
+        if ((!valor) || (valor==""))
+            return;
+
+        var doador = {
+            "id": (doadores.length + 1),
+            "nome":nome,
+            "dia":dia,
+            "valor":valor,
+            "imp":"1",
+            "ativo":"1"
+        };
+
+        doadores.push(doador);
+        salvaDoador(doador);
+        apresentaDoador(doador, doadores.length-1);
+        mostraListaDoadores();
+    }
+
+    function salvaDoador(doador) {
+        window.localStorage.setItem("doador_"+doador.id, doador.nome);
+        window.localStorage.setItem("dia_"+doador.id, doador.dia);
+        window.localStorage.setItem("valor_"+doador.id, doador.valor);
+        window.localStorage.setItem("imp_"+doador.id, doador.imp);
+        window.localStorage.setItem("ativo_"+doador.id, doador.ativo);
+    }
+
+    function voltarAosNomes() {
+        document.getElementById("div_recibos").style.display="none";
+        document.getElementById("div_nomes").style.display="block";
+    }
+  </script>
+</head>
+<body onload="carregaListaNomes()">
+
+    <div id="div_nomes">
+        <p><strong>Recibos da Amobam</strong></p>
+        <hr />
+        <div>
+            <div id="div_botoes">
+                <button onclick="novoDoador()">Novo doador</button> <button onclick="imprimirRecibos()">Imprimir</button>
+            </div>
+            <div id="div_msg">Carregando sua lista, aguarde...</div>
+            <div id="div_dados">
+                <table id="table_dados">
+                    <tr>
+                        <td><b>Nome</b></td>
+                        <td><b>Dia</b></td>
+                        <td><b>Valor</b></td>
+                        <td><b>Imp</b></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="div_recibos">
+
+        <table><tr><td class="borda-externa"> <!-- borda externa do recbido -->
+
+            <table><tr> <!-- Area do logo e título -->
+
+                <td> <!-- Logo -->
+                    <img src="./logo1.png" />
+                </td>
+
+                <td class="centralizado"> <!-- Título -->
+                    <strong>Associação dos Moradores do Bairro Mollon</strong> <br />
+                    Rua Atílio Bagarolo, 54, Mollon IV - SBO <br />
+                    Telefone: (19) 3026-6735 | (19) 3457-2406 <br />
+                    Email: amobam@amobam.org<br />
+                    CNPJ: 02.921.188/0001-36 | I.E.: Isento
+                </td>
+
+            </tr></table>
+
+            <table width="100%"><tr> <!-- Area do número de recibo e valor -->
+
+                <td> <!-- Número -->
+                    Recibo No. <b>1234</b>
+                </td>
+
+                <td class="direita"> <!-- Valor -->
+                    Valor <b>R$ 10,00</b>
+                </td>
+
+            </tr></table>
+
+            <table width="100%"><tr><td class="centralizado"> <!-- Area da discriminação -->
+
+                <p>
+                    Recebemos de <b>Willian Fernando Soares</b> valor referente à contribuição para a <b>"AMOBAM"</b>.
+                </p>
+                <p class="direita">
+                    SBO, 20 de Maio de 2023
+                </p>
+
+            </td></tr></table>
+
+            <table width="100%"><tr><td class="centralizado"> <!-- Area da Assinatura -->
+
+                <p>
+                    ________________________________________________________
+                </p>
+                <p>
+                    Rosinha Aparecida de Souza Vicentin<br />Presidente
+                </p>
+                <p class="pequeno">
+                    "Sorria ao acordar e expresse gratidão: sua primeira respiração matutina é a prova da Graça de Deus."
+                </p>
+
+            </td></tr></table>
+
+        </td></tr></table>
+
+        <p><a href="javascript:voltarAosNomes()">Voltar aos nomes</a></p>
+
+    </div>
+
+</body>
+</html>
