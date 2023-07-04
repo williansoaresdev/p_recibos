@@ -8,7 +8,7 @@
         color:#000;
         background-color: #fff;
         font-family: "Arial";
-        font-size: 11pt;
+        font-size: 10pt;
     }
 
     table {
@@ -16,7 +16,7 @@
     }
 
     td {
-        padding: 5px;
+        padding: 2px;
     }
 
     .borda-externa {
@@ -44,24 +44,29 @@
     }
 
     .pequeno {
-        font-size: 8pt;
+        font-size: 7pt;
         font-style: italic;
     }
 
   </style>
   <script>
-    var margem_abaixo = 0;
-    var doadores = new Array();
+    var margem_abaixo = 30;
+    var doadoresList  = new Array();
+    var doadorIndex   = -1;
 
     function alternaImpressao(index) {
-        if (doadores[index].imp == "1")
-            doadores[index].imp = "0";
+        doador = doadorAsObject(doadoresList[index]);
+
+        if (doador.imp == "1")
+            doador.imp = "0";
         else
-            doadores[index].imp = "1";
+            doador.imp = "1";
 
-        salvaDoador(doadores[index]);
+        doadoresList[index] = doadorAsString(doador);
 
-        document.getElementById("btn_imp_"+index).innerHTML = ((doadores[index].imp=="1") ? "Sim" : "Não");
+        salvaDoador(doadoresList[index], doador.id);
+
+        document.getElementById("btn_imp_"+index).innerHTML = ((doador.imp=="1") ? "Sim" : "Não");
     }
 
     function apresentaDoador(doador, index) {
@@ -76,7 +81,7 @@
     }
 
     function mostraListaDoadores() {
-        if (doadores.length) {
+        if (doadoresList.length) {
             document.getElementById("div_msg").style.display="none";
             document.getElementById("div_dados").style.display="block";
             
@@ -87,38 +92,25 @@
 
     function carregaListaNomes() {
 
-        var doador_id = 1;
+        doadorIndex = 0;
+        var doador = window.localStorage.getItem("db_doadores_" + doadorIndex);
 
-        var nome = window.localStorage.getItem("doador_" + doador_id);
-        while (nome) {
-            var dia     = window.localStorage.getItem("dia_" + doador_id);
-            var valor   = window.localStorage.getItem("valor_" + doador_id);
-            var ativo   = window.localStorage.getItem("ativo_" + doador_id);
-            var imprime = window.localStorage.getItem("imp_" + doador_id);
-
-            var doador = {
-                    "id": doador_id,
-                    "nome":nome,
-                    "dia":dia,
-                    "valor":valor,
-                    "imp":imprime,
-                    "ativo":ativo
-                };
-            doadores.push(doador);
-
-            doador_id++;
-            nome = window.localStorage.getItem("doador_" + doador_id);
+        while (doador) {
+            doadoresList.push(doador);
+            doadorIndex++;
+            doador = window.localStorage.getItem("db_doadores_" + doadorIndex);
         }
 
-        if (doadores.length) {
-            doadores.sort((a, b) => {
-                return a.nome - b.nome;
-            });
+        if (doadoresList.length) {
+            doadoresList.sort();
 
-            doadores.forEach(function(item, index) {
-                if (item.ativo == "1") {
-                    apresentaDoador(item, index);
+            doadoresList.forEach(function(item, index){
+
+                doador = doadorAsObject(item);
+                if ((doador) && (doador.ativo=="1")) {
+                    apresentaDoador(doador, index);
                 }
+
             });
         }
 
@@ -126,9 +118,50 @@
         mostraBotoes();
     }
 
-    function geraReciboDoador(item) {
+    function doadorAsString(doadorObj) {
+        return doadorObj.nome + "|" + doadorObj.dia + "|" + doadorObj.valor + "|" + doadorObj.ativo + "|" + doadorObj.imp + "|" + doadorObj.id;
+    }
+
+    function doadorAsObject(doadorString) {
+        doadorCampos = doadorString.split("|");
+
+        if (doadorCampos.length >= 6) {
+            var nome    = doadorCampos[0];
+            var dia     = doadorCampos[1];
+            var valor   = doadorCampos[2];
+            var ativo   = doadorCampos[3];
+            var imprime = doadorCampos[4];
+            var id      = doadorCampos[5];
+
+            return {
+                "id":id,
+                "nome":nome,
+                "dia":dia,
+                "valor":valor,
+                "imp":imprime,
+                "ativo":ativo
+            };
+        }
+
+        return null;
+    }
+
+    function getNumeroRecibo() {
+        numAtual = window.localStorage.getItem("num_recibo");
+
+        if (!numAtual)
+            numAtual = 0;
+        
+        numAtual++;
+
+        window.localStorage.setItem("num_recibo", numAtual);
+
+        return numAtual;
+    }
+
+    function geraReciboDoador(doador) {
         html = "<div style='padding-bottom:"+margem_abaixo+"px'>";
-        html += "   <table><tr><td class='borda-externa'>";
+        html += "   <table width='90%'><tr><td class='borda-externa'>";
         html += "<table><tr>";
         html += "<td><img src='./logo1.png' /></td>";
         html += "<td class='centralizado'>";
@@ -138,16 +171,16 @@
         html += "Email: amobam@amobam.org<br />";
         html += "CNPJ: 02.921.188/0001-36 | I.E.: Isento";
         html += "</td></tr></table><table width='100%'><tr>";
-        html += "<td>Recibo No. <b>1234</b></td>";
-        html += "<td class='direita'>Valor <b>R$ 10,00</b></td>";
+        html += "<td>Recibo No. <b>"+getNumeroRecibo()+"</b></td>";
+        html += "<td class='direita'>Valor <b>R$ "+doador.valor+"</b></td>";
         html += "</tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>";
-        html += "<p>Recebemos de <b>Willian Fernando Soares</b> valor referente à contribuição para a <b>\"AMOBAM\"</b>.</p>";
-        html += "<p class='direita'>SBO, 20 de Maio de 2023</p>";
+        html += "<p>Recebemos de <b>"+doador.nome+"</b> valor referente à contribuição para a <b>\"AMOBAM\"</b>.</p>";
+        html += "<p class='direita'>SBO, "+doador.dia+" de "+getMesCalendario()+" de "+getAnoCalendario()+"</p>";
         html += "</td></tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>";
-        html += "<p>________________________________________________________</p>";
-        html += "<p>Rosinha Aparecida de Souza Vicentin<br />Presidente</p>";
+        html += "<p>________________________________________________________<br />";
+        html += "Rosinha Aparecida de Souza Vicentin<br />Presidente</p>";
         html += "<p class='pequeno'>\"Sorria ao acordar e expresse gratidão: sua primeira respiração matutina é a prova da Graça de Deus.\"</p>";
         html += "</td></tr></table></td></tr></table>";
         html += "</div>";
@@ -155,15 +188,28 @@
         return html;
     }
 
+    function getAnoCalendario() {
+        let d = new Date();
+        return d.getFullYear();
+    }
+
+    function getMesCalendario() {
+        months = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+
+        let d = new Date();
+        return months[d.getMonth()];
+    }
+
     function imprimirRecibos() {
         var html = "";
         var fez = false;
 
-        if (doadores.length) {
-            doadores.forEach(function(item, index){
-                if ((item.ativo=="1") && (item.imp=="1")) {
+        if (doadoresList.length) {
+            doadoresList.forEach(function(item, index){
+                doador = doadorAsObject(item);
+                if ((doador.ativo=="1") && (doador.imp=="1")) {
                     fez = true;
-                    html += geraReciboDoador(item);
+                    html += geraReciboDoador(doador);
                 }
             });
         }
@@ -201,8 +247,10 @@
         if ((!valor) || (valor==""))
             return;
 
-        var doador = {
-            "id": (doadores.length + 1),
+        var proximoIndex = doadoresList.length;
+
+        var doadorObj = {
+            "id":proximoIndex,
             "nome":nome,
             "dia":dia,
             "valor":valor,
@@ -210,18 +258,18 @@
             "ativo":"1"
         };
 
-        doadores.push(doador);
-        salvaDoador(doador);
-        apresentaDoador(doador, doadores.length-1);
+        var doadorString = doadorAsString(doadorObj);
+
+        doadoresList.push(doadorString);
+
+        apresentaDoador(doadorObj, proximoIndex);
+        salvaDoador(doadorString, proximoIndex);
+
         mostraListaDoadores();
     }
 
-    function salvaDoador(doador) {
-        window.localStorage.setItem("doador_"+doador.id, doador.nome);
-        window.localStorage.setItem("dia_"+doador.id, doador.dia);
-        window.localStorage.setItem("valor_"+doador.id, doador.valor);
-        window.localStorage.setItem("imp_"+doador.id, doador.imp);
-        window.localStorage.setItem("ativo_"+doador.id, doador.ativo);
+    function salvaDoador(doadorString, index) {
+        window.localStorage.setItem("db_doadores_"+index, doadorString);
     }
 
     function voltarAosNomes() {
