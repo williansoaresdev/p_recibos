@@ -8,7 +8,7 @@
         color:#000;
         background-color: #fff;
         font-family: "Arial";
-        font-size: 10pt;
+        font-size: 9pt;
     }
 
     table {
@@ -50,7 +50,7 @@
 
   </style>
   <script>
-    var margem_abaixo = 30;
+    var margem_abaixo = 7;
     var doadoresList  = new Array();
     var doadorIndex   = -1;
 
@@ -161,9 +161,9 @@
 
     function geraReciboDoador(doador) {
         html = "<div style='padding-bottom:"+margem_abaixo+"px'>";
-        html += "   <table width='90%'><tr><td class='borda-externa'>";
-        html += "<table><tr>";
-        html += "<td><img src='./logo1.png' /></td>";
+        html += "   <table width='100%'><tr><td class='borda-externa'>";
+        html += "<table width='100%'><tr>";
+        html += "<td width='110'><img src='./logo1.png' width=100 /></td>";
         html += "<td class='centralizado'>";
         html += "<strong>Associação dos Moradores do Bairro Mollon</strong> <br />";
         html += "Rua Atílio Bagarolo, 54, Mollon IV - SBO <br />";
@@ -171,15 +171,15 @@
         html += "Email: amobam@amobam.org<br />";
         html += "CNPJ: 02.921.188/0001-36 | I.E.: Isento";
         html += "</td></tr></table><table width='100%'><tr>";
-        html += "<td>Recibo No. <b>"+getNumeroRecibo()+"</b></td>";
-        html += "<td class='direita'>Valor <b>R$ "+doador.valor+"</b></td>";
+        html += "<td>&nbsp;&nbsp;&nbsp;Recibo No. <b>"+getNumeroRecibo()+"</b></td>";
+        html += "<td class='direita'>Valor <b>R$ "+doador.valor+"&nbsp;&nbsp;&nbsp;</b></td>";
         html += "</tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>";
         html += "<p>Recebemos de <b>"+doador.nome+"</b> valor referente à contribuição para a <b>\"AMOBAM\"</b>.</p>";
-        html += "<p class='direita'>SBO, "+doador.dia+" de "+getMesCalendario()+" de "+getAnoCalendario()+"</p>";
-        html += "</td></tr></table>";
-        html += "<table width='100%'><tr><td class='centralizado'>";
-        html += "<p>________________________________________________________<br />";
+        html += "<p class='direita'>SBO, "+doador.dia+" de "+getMesCalendario()+" de "+getAnoCalendario()+"&nbsp;&nbsp;&nbsp;</p>";
+/*        html += "</td></tr></table>";
+        html += "<table width='100%'><tr><td class='centralizado'>"; */
+        html += "<p style='font-size: 8pt'>________________________________________________________<br />";
         html += "Rosinha Aparecida de Souza Vicentin<br />Presidente</p>";
         html += "<p class='pequeno'>\"Sorria ao acordar e expresse gratidão: sua primeira respiração matutina é a prova da Graça de Deus.\"</p>";
         html += "</td></tr></table></td></tr></table>";
