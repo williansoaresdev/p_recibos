@@ -54,6 +54,32 @@
     var doadoresList  = new Array();
     var doadorIndex   = -1;
 
+    function alteraDoador(index) {
+        doador = doadorAsObject(doadoresList[index]);
+
+        var nome = prompt("Nome:", doador.nome);
+        if ((!nome) || (nome==""))
+            return;
+
+        var dia = prompt("Dia da doação:", doador.dia);
+        if ((!dia) || (dia==""))
+            return;
+
+        var valor = prompt("Valor da doação:", doador.valor);
+        if ((!valor) || (valor==""))
+            return;
+
+        doador.nome  = nome;
+        doador.dia   = dia;
+        doador.valor = valor;
+
+        doadoresList[index] = doadorAsString(doador);
+
+        salvaDoador(doadoresList[index], doador.id);
+
+        window.location.reload();
+    }
+
     function alternaImpressao(index) {
         doador = doadorAsObject(doadoresList[index]);
 
@@ -70,11 +96,12 @@
     }
 
     function apresentaDoador(doador, index) {
-        var html = "<tr>";
+        var html = "<tr id='tr_"+index+"'>";
         html += "<td>"+doador.nome+"</td>";
         html += "<td>"+doador.dia+"</td>";
         html += "<td>"+doador.valor+"</td>";
         html += "<td><button id='btn_imp_"+index+"' onclick=alternaImpressao("+index+")>"+((doador.imp=="1") ? "Sim" : "Não") +"</button></td>";
+        html += "<td><button id='btn_alt_"+index+"' onclick=alteraDoador("+index+")>Alt</button><button id='btn_exc_"+index+"' onclick=excluiDoador("+index+")>Exc</button></td>";
         html += "</tr>";
 
         document.getElementById("table_dados").insertAdjacentHTML("beforeend", html);
@@ -146,6 +173,20 @@
         return null;
     }
 
+    function excluiDoador(index) {
+        doador = doadorAsObject(doadoresList[index]);
+
+        if (confirm("Deseja mesmo excluir o "+doador.nome+" da lista?")) {
+            doador.ativo = "0";
+
+            doadoresList[index] = doadorAsString(doador);
+
+            salvaDoador(doadoresList[index], doador.id);
+
+            document.getElementById("tr_"+index).remove();
+        }
+    }
+
     function getNumeroRecibo() {
         numAtual = window.localStorage.getItem("num_recibo");
 
@@ -160,8 +201,17 @@
     }
 
     function geraReciboDoador(doador) {
+        let numeroRecibo = getNumeroRecibo();
+
         html = "<div style='padding-bottom:"+margem_abaixo+"px'>";
-        html += "   <table width='100%'><tr><td class='borda-externa'>";
+        html += "   <table width='100%'><tr><td class='borda-externa' width=100>";
+        html += "<b>No.</b> "+numeroRecibo+"<br />";
+        html += "<b>Valor</b> R$ "+doador.valor+"<br />&nbsp;<br />";
+        html += "Recebemos de "+doador.nome+" referente à contribuição para a \"AMOBAM\".<br />&nbsp;<br />";
+        html += "____________<br />";
+        html += "Doador<br />";
+        html += doador.dia+"/"+getMesCalendario(true)+"/"+getAnoCalendario();
+        html += "</td><td class='borda-externa'>";    
         html += "<table width='100%'><tr>";
         html += "<td width='110'><img src='./logo1.png' width=100 /></td>";
         html += "<td class='centralizado'>";
@@ -173,7 +223,7 @@
         html += "</td>";
         html += "<td width='110' class='direita'><img src='./pix_amobam.png' width=60 /></td>";
         html += "</tr></table><table width='100%'><tr>";
-        html += "<td>&nbsp;&nbsp;&nbsp;Recibo No. <b>"+getNumeroRecibo()+"</b></td>";
+        html += "<td>&nbsp;&nbsp;&nbsp;Recibo No. <b>"+numeroRecibo+"</b></td>";
         html += "<td class='direita'>Valor <b>R$ "+doador.valor+"&nbsp;&nbsp;&nbsp;</b></td>";
         html += "</tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>";
@@ -195,10 +245,19 @@
         return d.getFullYear();
     }
 
-    function getMesCalendario() {
+    function getMesCalendario(onlyNumber) {
         months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
         let d = new Date();
+
+        if (onlyNumber) {
+            let m = (d.getMonth() + 1);
+            if (m < 10)
+                return "0" + String(m);
+
+            return m;
+        }
+
         return months[d.getMonth()];
     }
 
@@ -297,6 +356,7 @@
                         <td><b>Dia</b></td>
                         <td><b>Valor</b></td>
                         <td><b>Imp</b></td>
+                        <td><b>Opções</b></td>
                     </tr>
                 </table>
             </div>
