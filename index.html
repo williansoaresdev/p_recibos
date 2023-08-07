@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
   <title>Recibos Amobam</title>
   <style>
 
@@ -204,11 +205,11 @@
         let numeroRecibo = getNumeroRecibo();
 
         html = "<div style='padding-bottom:"+margem_abaixo+"px'>";
-        html += "   <table width='100%'><tr><td class='borda-externa' width=100>";
+        html += "   <table width='100%'><tr><td class='borda-externa' width=170>";
         html += "<b>No.</b> "+numeroRecibo+"<br />";
         html += "<b>Valor</b> R$ "+doador.valor+"<br />&nbsp;<br />";
         html += "Recebemos de "+doador.nome+" referente à contribuição para a \"AMOBAM\".<br />&nbsp;<br />";
-        html += "____________<br />";
+        html += "________________________<br />";
         html += "Doador<br />";
         html += doador.dia+"/"+getMesCalendario(true)+"/"+getAnoCalendario();
         html += "</td><td class='borda-externa'>";    
@@ -227,7 +228,7 @@
         html += "<td class='direita'>Valor <b>R$ "+doador.valor+"&nbsp;&nbsp;&nbsp;</b></td>";
         html += "</tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>";
-        html += "<p>Recebemos de <b>"+doador.nome+"</b> valor referente à contribuição para a <b>\"AMOBAM\"</b>.</p>";
+        html += "<p>Recebemos de <b>"+doador.nome+"</b> valor ref. à contribuição para a <b>\"AMOBAM\"</b>.</p>";
         html += "<p class='direita'>SBO, "+doador.dia+" de "+getMesCalendario()+" de "+getAnoCalendario()+"&nbsp;&nbsp;&nbsp;</p>";
 /*        html += "</td></tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>"; */
