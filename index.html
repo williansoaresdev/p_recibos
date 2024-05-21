@@ -28,6 +28,10 @@
         display: none;
     }
 
+    #div_json {
+        display: none;
+    }
+
     #div_recibos {
         display: none;
     }
@@ -233,7 +237,7 @@
 /*        html += "</td></tr></table>";
         html += "<table width='100%'><tr><td class='centralizado'>"; */
         html += "<p style='font-size: 8pt'>________________________________________________________<br />";
-        html += "Rosinha Aparecida de Souza Vicentin<br />Presidente</p>";
+        html += "Justo Pedro de Lima<br />Presidente</p>";
         html += "<p class='pequeno'>\"Sorria ao acordar e expresse gratidão: sua primeira respiração matutina é a prova da Graça de Deus.\"</p>";
         html += "</td></tr></table></td></tr></table>";
         html += "</div>";
@@ -338,6 +342,57 @@
         document.getElementById("div_recibos").style.display="none";
         document.getElementById("div_nomes").style.display="block";
     }
+
+    function showDataAsJSON() {
+        document.getElementById("div_nomes").style.display="none";
+        document.getElementById("div_json").style.display="block";
+
+        let myJSON = {"listagem": doadoresList};
+
+        document.getElementById("txtJSON").value = JSON.stringify(myJSON);
+
+        setTimeout(function(){
+            document.getElementById("txtJSON").select();
+        },500);
+    }
+
+    function closeJSONView() {
+        document.getElementById("div_json").style.display="none";
+        document.getElementById("div_nomes").style.display="block";
+    }
+
+    function updateJSONData() {
+        if (!confirm("Deseja mesmo atualizar os dados? As informações anteriores não poderão ser repostas."))
+            return;
+
+        let newContent = document.getElementById("txtJSON").value;
+        if (newContent == "") {
+            alert("Nenhum dado informado.");
+            return;
+        }
+
+        let newJSONData = JSON.parse(newContent);
+
+        if ((newJSONData) && (newJSONData.listagem) && (newJSONData.listagem.length)) {
+            doadorIndex = 0;
+            var doador = window.localStorage.getItem("db_doadores_" + doadorIndex);
+            while (doador) {
+                window.localStorage.removeItem("db_doadores_" + doadorIndex);
+                doadorIndex++;
+                doador = window.localStorage.getItem("db_doadores_" + doadorIndex);
+            }
+
+            newJSONData.listagem.forEach(function(item, index){
+                doador = window.localStorage.setItem("db_doadores_" + index, item);
+            });
+
+            window.location.reload();
+
+            return true;
+        }
+
+        alert("Dados informados em um padrão incorreto.");
+    }
   </script>
 </head>
 <body onload="carregaListaNomes()">
@@ -347,7 +402,7 @@
         <hr />
         <div>
             <div id="div_botoes">
-                <button onclick="novoDoador()">Novo doador</button> <button onclick="imprimirRecibos()">Imprimir</button>
+                <button onclick="novoDoador()">Novo doador</button> <button onclick="imprimirRecibos()">Imprimir</button> <button onclick="showDataAsJSON()">Backup</button>
             </div>
             <div id="div_msg">Carregando sua lista, aguarde...</div>
             <div id="div_dados">
@@ -362,6 +417,13 @@
                 </table>
             </div>
         </div>
+    </div>
+
+    <div id="div_json">
+        <textarea cols="120" rows="20" id="txtJSON">
+
+        </textarea><br />
+        <button onclick="updateJSONData()">Atualizar dados</button> <button onclick="closeJSONView()">Voltar</button>
     </div>
 
     <div id="div_recibos">
